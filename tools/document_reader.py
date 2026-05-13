@@ -30,6 +30,19 @@ class DocumentReaderTool:
         except Exception as e:
             return f"Error reading PDF: {e}"
 
+    def parse_employee_csv(self, filepath: str) -> list:
+        try:
+            import csv
+            with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+                reader = csv.DictReader(f)
+                rows = []
+                for row in reader:
+                    clean = {k.strip().lower(): v.strip() for k, v in row.items() if k}
+                    rows.append(clean)
+                return rows
+        except Exception:
+            return []
+
     def read_directory(self, dirpath: str, pattern: str = "") -> dict:
         files = {}
         for root, _, filenames in os.walk(dirpath):

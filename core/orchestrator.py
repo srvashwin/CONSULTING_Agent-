@@ -207,9 +207,10 @@ class ConsultingOrchestrator:
             "Return JSON with: gaps (array of objects with 'what' (what's missing) and "
             "'search_query' (a specific search query to find it))."
         )
+        eng = result.get("engagement", result.get("engagement_type", "analysis"))
         analysis_summary = json.dumps(
             {
-                "engagement": result["engagement"],
+                "engagement": eng,
                 "findings_count": len(result["analysis"].get("findings", [])),
                 "exec_summary_preview": result["analysis"].get("executive_summary", "")[:300],
             }
@@ -220,7 +221,7 @@ class ConsultingOrchestrator:
             messages=[
                 {
                     "role": "user",
-                    "content": f"First-pass analysis summary:\n{analysis_summary}\n\nQuestion: {result['question']}\nCompany: {result['company']}",
+                    "content": f"First-pass analysis summary:\n{analysis_summary}\n\nQuestion: {result.get('question', result.get('issue', ''))}\nCompany: {result['company']}",
                 }
             ],
             schema={
@@ -286,7 +287,7 @@ class ConsultingOrchestrator:
                 "findings (updated array of 5-8 specific findings)."
             )
             user_msg = (
-                f"Original question: {result['question']}\n"
+                f"Original question: {result.get('question', result.get('issue', ''))}\n"
                 f"Company: {result['company']}\n\n"
                 f"Previous analysis:\n{result['analysis'].get('detailed_analysis', '')[:4000]}\n\n"
                 f"Previous findings:\n{json.dumps(result['analysis'].get('findings', []), indent=2)}\n\n"
@@ -497,3 +498,298 @@ class ConsultingOrchestrator:
                 seen.add(url)
                 lines.append(f"- [{s.get('title', 'Source')}]({url})")
         return "\n".join(lines) if lines else "Web research and financial data analysis."
+
+    # ── Multi-step conversational engagement ──
+
+    def engage(self, issue: str, company: str, ticker: str, conversation: list, issue_type: str = None) -> dict:
+        is_first_round = len(conversation) == 0
+        conv_text = "\n".join(
+            f"{'User' if m['role'] == 'user' else 'Agent'}: {m['content']}"
+            for m in conversation[-6:]  # last 6 messages for context window
+        )
+
+        if is_first_round:
+            system = (
+                "You are a senior strategy consultant conducting an initial client discovery session. "
+                "Your goal is to understand the client's business issue deeply before providing analysis.\n\n"
+                "Classify the issue into one of these types:\n"
+                "- profitability: revenue/cost/margin/pricing problems\n"
+                "- growth: expansion/new markets/product launch/scaling\n"
+                "- hiring_talent: recruitment/team building/skills gaps\n"
+                "- restructuring: layoffs/headcount reduction/reorganization\n"
+                "- merger_acquisition: M&A/due diligence/integration/valuation\n"
+                "- operations: process efficiency/supply chain/workflow\n"
+                "- strategy: competitive positioning/market threats/long-term direction\n"
+                "- other: anything not covered above\n\n"
+                "Return JSON:\n"
+                "{\n"
+                '  "issue_type": "<classified type>",\n'
+                '  "understanding": "<1-2 sentence summary of what you understand>",\n'
+                '  "questions": ["<question 1>", "<question 2>", ...],\n'
+                '  "next_action": "questions"\n'
+                "}\n\n"
+                "Ask 2-3 targeted questions that clarify scope, metrics, and constraints. "
+                "Be specific and ask for numbers where possible."
+            )
+            messages = [
+                {"role": "user", "content": f"Company: {company}\nIssue: {issue}"}
+            ]
+            result = self.llm.structured_conversational(system, messages, {
+                "type": "object",
+                "properties": {
+                    "issue_type": {"type": "string"},
+                    "understanding": {"type": "string"},
+                    "questions": {"type": "array", "items": {"type": "string"}},
+                    "next_action": {"type": "string", "enum": ["questions", "ready"]},
+                },
+            })
+            return result
+
+        # Subsequent rounds: process user's answer, decide next step
+        system = (
+            "You are a senior strategy consultant. You are in the middle of a discovery conversation with a client.\n\n"
+            "Classify the issue into one of these types if not already known:\n"
+            "- profitability / growth / hiring_talent / restructuring / merger_acquisition / operations / strategy / other\n\n"
+            "Review the conversation history and the user's latest answer. Decide whether you have enough information "
+            "to proceed with analysis or need more details.\n\n"
+            "Return JSON:\n"
+            "{\n"
+            '  "issue_type": "<type or keep previous>",\n'
+            '  "understanding": "<updated 1-2 sentence summary>",\n'
+            '  "questions": ["<follow-up question, if needed>"],\n'
+            '  "additional_data_hint": "<what data would help: e.g. employee CSV, financial statements, org chart, or empty string>",\n'
+            '  "next_action": "questions" or "ready"\n'
+            "}\n\n"
+            "If you need more info, set next_action to 'questions' and ask 1-2 focused follow-ups. "
+            "If you have a clear picture, set next_action to 'ready'."
+        )
+        messages = [
+            {"role": "user", "content": f"Company: {company}\nIssue type: {issue_type or 'unknown'}\nIssue: {issue}\n\nRecent conversation:\n{conv_text}"}
+        ]
+        result = self.llm.structured_conversational(system, messages, {
+            "type": "object",
+            "properties": {
+                "issue_type": {"type": "string"},
+                "understanding": {"type": "string"},
+                "questions": {"type": "array", "items": {"type": "string"}},
+                "additional_data_hint": {"type": "string"},
+                "next_action": {"type": "string", "enum": ["questions", "ready"]},
+            },
+        })
+        return result
+
+    def run_issue_analysis(self, issue: str, company: str, ticker: str, issue_type: str, conversation: list, documents: list = None) -> dict:
+        conv_summary = "\n".join(f"{m['role']}: {m['content']}" for m in conversation[-10:])
+        engagement_label = {
+            "profitability": "Profitability Analysis",
+            "growth": "Growth Strategy",
+            "hiring_talent": "Talent & Hiring Plan",
+            "restructuring": "Restructuring & Cost Optimization",
+            "merger_acquisition": "M&A Due Diligence",
+            "operations": "Operations Improvement",
+            "strategy": "Strategic Analysis",
+            "other": "Business Analysis",
+        }
+        eng_type = engagement_label.get(issue_type, "Business Analysis")
+
+        result = {
+            "company": company,
+            "ticker": ticker or "",
+            "issue": issue,
+            "issue_type": issue_type,
+            "engagement_type": eng_type,
+            "conversation": conversation,
+            "status": "running",
+            "generated_at": datetime.now().isoformat(),
+            "financials": {},
+            "multi_year_financials": {},
+            "price_history": {},
+            "competitor_benchmark": {},
+            "industry_benchmark": {},
+            "company_data": {},
+            "analysis": {},
+            "recommendations": {},
+            "before_after": {},
+            "documents_ingested": [],
+            "deliverable_path": "",
+        }
+
+        # 1. Web research
+        result["company_data"] = self.web.research_company(company)
+
+        # 2. Financial data (only if public ticker)
+        if ticker:
+            fin = self.financial.get_company_financials(ticker)
+            if "error" not in fin:
+                result["financials"] = fin
+            multi = self.financial.get_multi_year_financials(ticker)
+            if "error" not in multi:
+                result["multi_year_financials"] = multi
+            price = self.financial.get_stock_price_history(ticker)
+            if "error" not in price:
+                result["price_history"] = price
+            bench = self.market.competitor_benchmarking(ticker, question=issue)
+            if "error" not in bench:
+                result["competitor_benchmark"] = bench
+            ind_bench = self.market.industry_benchmarks(ticker, question=issue)
+            if "error" not in ind_bench:
+                result["industry_benchmark"] = ind_bench
+
+        # 3. Document ingestion
+        parsed_data = {"employees": [], "financials": [], "notes": ""}
+        if documents:
+            for doc in documents:
+                content = self.doc_reader.read_file(doc)
+                parsed_data["notes"] += f"\n--- {os.path.basename(doc)} ---\n{content[:15000]}"
+                result["documents_ingested"].append(os.path.basename(doc))
+                # Parse CSV for employee data
+                if doc.endswith(".csv"):
+                    parsed = self.doc_reader.parse_employee_csv(doc)
+                    if parsed:
+                        parsed_data["employees"].extend(parsed)
+
+        # 4. Build analysis prompt based on issue type
+        system = self._build_issue_prompt(eng_type, issue_type, conv_summary)
+
+        user_msg = f"Company: {company}\nIssue: {issue}\n\nConversation summary:\n{conv_summary}\n\n"
+        if result["financials"]:
+            user_msg += f"Financial data:\n{json.dumps(result['financials'], indent=2, default=str)[:2000]}\n\n"
+        if result.get("multi_year_financials", {}).get("years"):
+            user_msg += f"Multi-year trends:\n{json.dumps(result['multi_year_financials'], indent=2, default=str)[:2000]}\n\n"
+        if result.get("competitor_benchmark", {}).get("strengths"):
+            user_msg += f"Competitor benchmarks:\n{json.dumps(result['competitor_benchmark'], indent=2, default=str)[:2000]}\n\n"
+        if parsed_data["notes"]:
+            user_msg += f"User-provided documents:\n{parsed_data['notes'][:6000]}\n\n"
+        if parsed_data["employees"]:
+            user_msg += f"Employee data ({len(parsed_data['employees'])} records):\n{json.dumps(parsed_data['employees'][:30], default=str)[:3000]}\n\n"
+
+        analysis = self.llm.structured_heavy(system, [{"role": "user", "content": user_msg}], {
+            "type": "object",
+            "properties": {
+                "executive_summary": {"type": "string"},
+                "detailed_analysis": {"type": "string"},
+                "findings": {"type": "array", "items": {"type": "string"}},
+            },
+        })
+        analysis_dict = analysis if isinstance(analysis, dict) else {}
+        result["analysis"] = analysis_dict
+
+        # 5. Deep research loop
+        result = self._deep_research_loop(result)
+
+        # 6. Recommendations
+        recs = self.llm.structured_heavy(
+            "You are a senior partner at a top consulting firm. "
+            "Based on the analysis, provide strategic recommendations and risk assessment. "
+            "Return JSON with: recommendations (3-5 specific recommendations numbered format), "
+            "risks (3-5 risks with mitigation strategies).",
+            [{"role": "user", "content": f"Company: {company}\nIssue type: {issue_type}\n\nAnalysis: {(result.get('analysis') or {}).get('detailed_analysis', '')[:4000]}\n\nFindings: {json.dumps((result.get('analysis') or {}).get('findings', []))}"}],
+            {"type": "object", "properties": {"recommendations": {"type": "string"}, "risks": {"type": "string"}}},
+        )
+        recs_dict = recs if isinstance(recs, dict) else {}
+        result["recommendations"] = recs_dict
+
+        # 7. Before/After comparison
+        result["before_after"] = self._generate_before_after(company, issue, issue_type, parsed_data, result["analysis"], result["recommendations"])
+
+        result["status"] = "complete"
+        return result
+
+    def _build_issue_prompt(self, eng_type: str, issue_type: str, context: str) -> str:
+        base = (
+            f"You are a senior strategy consultant conducting a '{eng_type}' engagement. "
+            "Base your analysis on the client's description, any provided data, financial metrics, and market research. "
+            "Be specific, data-driven, and actionable.\n\n"
+        )
+        specifics = {
+            "restructuring": (
+                "Focus: Analyze the current team structure and costs. Identify optimal reduction strategy "
+                "that minimizes business impact. Consider severance costs, retention risks, org design "
+                "best practices, and performance-based criteria. Provide quantified savings and headcount recommendations."
+            ),
+            "profitability": (
+                "Focus: Analyze revenue streams, cost structure, margins, and pricing. Compare against "
+                "industry benchmarks. Identify profit improvement levers (revenue growth, cost reduction, "
+                "pricing optimization) with quantified impact estimates."
+            ),
+            "growth": (
+                "Focus: Analyze market opportunity, competitive landscape, and company readiness. "
+                "Recommend growth channels, market entry strategy, resource requirements, and expected "
+                "timeline to scale. Consider organic vs. acquisition paths."
+            ),
+            "hiring_talent": (
+                "Focus: Assess current team structure, skills gaps, and hiring needs. Recommend optimal "
+                "team size, role prioritization, sourcing strategy, and timeline. Consider budget "
+                "constraints, ramp-up time, and cultural fit."
+            ),
+            "merger_acquisition": (
+                "Focus: Evaluate strategic fit, financial implications, and integration challenges. "
+                "Assess valuation, synergy opportunities, cultural compatibility, and regulatory risks. "
+                "Provide a clear recommendation with rationale."
+            ),
+            "operations": (
+                "Focus: Identify operational bottlenecks, inefficiencies, and improvement opportunities. "
+                "Recommend process changes, technology investments, or workflow optimizations with "
+                "quantified efficiency and cost impact projections."
+            ),
+            "strategy": (
+                "Focus: Analyze competitive position, market trends, and strategic options. "
+                "Evaluate build vs. buy vs. partner decisions. Provide a clear strategic direction "
+                "with implementation roadmap and key milestones."
+            ),
+            "other": (
+                "Focus: Provide a general strategic analysis addressing the client's specific issue. "
+                "Use relevant frameworks, data, and benchmarks. Be practical and actionable."
+            ),
+        }
+        return base + specifics.get(issue_type, specifics["other"])
+
+    def _generate_before_after(self, company: str, issue: str, issue_type: str, parsed_data: dict, analysis: dict, recommendations: dict) -> dict:
+        system = (
+            "You are a senior strategy consultant presenting findings to a client. "
+            "Create a clear before/after comparison showing the current state vs. the projected state "
+            "after implementing the recommendations.\n\n"
+            "Return JSON:\n"
+            "{\n"
+            '  "before_summary": "<2-3 sentences describing the current state with specific metrics>",\n'
+            '  "after_summary": "<2-3 sentences describing the projected state with specific improvements>",\n'
+            '  "verdict": "<1-2 sentence clear recommendation>",\n'
+            '  "comparison": [\n'
+            '    {"metric": "<metric name>", "before": "<value>", "after": "<value>", "change": "<direction and %>"}\n'
+            "  ],\n"
+            '  "key_benefits": ["<benefit 1>", "<benefit 2>", "<benefit 3>"]\n'
+            "}\n\n"
+            "Include specific quantified metrics from the analysis. The comparison table should have 4-7 rows "
+            "covering the most important dimensions (cost, headcount, revenue, efficiency, timeline, risk)."
+        )
+
+        emp_count = len(parsed_data.get("employees", []))
+        emp_text = f"Employee data available for {emp_count} people." if emp_count else ""
+        msg = (
+            f"Company: {company}\nIssue: {issue}\nIssue type: {issue_type}\n{emp_text}\n\n"
+            f"Executive summary: {(analysis or {}).get('executive_summary', '')[:1500]}\n\n"
+            f"Recommendations: {(recommendations or {}).get('recommendations', '')[:1500]}\n\n"
+            f"Risks: {(recommendations or {}).get('risks', '')[:1000]}"
+        )
+        result = self.llm.structured_conversational(system, [{"role": "user", "content": msg}], {
+            "type": "object",
+            "properties": {
+                "before_summary": {"type": "string"},
+                "after_summary": {"type": "string"},
+                "verdict": {"type": "string"},
+                "comparison": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "metric": {"type": "string"},
+                            "before": {"type": "string"},
+                            "after": {"type": "string"},
+                            "change": {"type": "string"},
+                        },
+                    },
+                },
+                "key_benefits": {"type": "array", "items": {"type": "string"}},
+            },
+        })
+        return result if isinstance(result, dict) else {}

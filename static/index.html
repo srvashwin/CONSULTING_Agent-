@@ -4,12 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Consulting Agent AI</title>
-<script src="https://cdn.tailwindcss.com">
-</script>
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js">
-</script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
-</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   * { font-family: 'Inter', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
@@ -22,47 +19,39 @@
   .hero { padding: 120px 24px 60px; text-align: center; background: linear-gradient(180deg, #f0f2f8 0%, #f8f9fc 100%); }
   .hero h1 { font-size: 42px; font-weight: 800; letter-spacing: -1px; color: #0a0e27; margin-bottom: 12px; }
   .hero p { color: #5a6090; font-size: 18px; max-width: 560px; margin: 0 auto 32px; line-height: 1.6; }
-  .input-card { max-width: 800px; margin: 0 auto; background: #fff; border-radius: 20px; padding: 40px; box-shadow: 0 4px 24px rgba(10,14,39,0.08); border: 1px solid #e8eaf0; }
+  .input-card { max-width: 820px; margin: 0 auto; background: #fff; border-radius: 20px; padding: 40px; box-shadow: 0 4px 24px rgba(10,14,39,0.08); border: 1px solid #e8eaf0; }
   .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
   .input-full { grid-column: 1 / -1; }
   .input-card label { display: block; font-size: 13px; font-weight: 600; color: #3a3e60; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
   .input-card input, .input-card textarea { width: 100%; padding: 12px 16px; border: 2px solid #e8eaf0; border-radius: 12px; font-size: 15px; transition: all 0.2s; background: #fafbfe; }
   .input-card input:focus, .input-card textarea:focus { outline: none; border-color: #c9a84c; background: #fff; box-shadow: 0 0 0 4px rgba(201,168,76,0.1); }
-  .input-card textarea { min-height: 90px; resize: vertical; }
-  .upload-zone { border: 2px dashed #d0d4e0; border-radius: 12px; padding: 24px; text-align: center; color: #5a6090; font-size: 14px; cursor: pointer; transition: all 0.2s; background: #fafbfe; }
-  .upload-zone:hover { border-color: #c9a84c; background: #fef7e8; }
-  .upload-zone.dragover { border-color: #c9a84c; background: #fef7e8; }
-  .upload-zone.has-files { border-color: #22c55e; background: #f0fdf4; }
-  .file-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #e8f0fe; border-radius: 20px; font-size: 12px; color: #2563eb; margin: 4px; }
-  .file-badge .remove { cursor: pointer; color: #ef4444; font-weight: 700; margin-left: 4px; }
+  .input-card textarea { min-height: 100px; resize: vertical; }
   .btn-primary { background: linear-gradient(135deg, #0a0e27, #1a1a3e); color: #fff; border: none; padding: 14px 40px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
   .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(10,14,39,0.2); }
   .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+  .btn-secondary { background: #fff; color: #0a0e27; border: 2px solid #e0e2ea; padding: 10px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-secondary:hover { border-color: #c9a84c; background: #fef7e8; }
   .spinner { display: none; width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
   .btn-primary:disabled .spinner { display: inline-block; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .status-bar { max-width: 800px; margin: 20px auto 0; background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(10,14,39,0.06); border: 1px solid #e8eaf0; display: none; }
-  .status-bar.active { display: block; }
-  .status-step { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid #f0f1f6; }
-  .status-step:last-child { border-bottom: none; }
-  .status-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; background: #e0e2ea; transition: all 0.3s; }
-  .status-dot.active { background: #c9a84c; box-shadow: 0 0 0 4px rgba(201,168,76,0.2); animation: pulse 1.5s infinite; }
-  .status-dot.done { background: #22c55e; }
-  .status-text { font-size: 14px; color: #5a6090; font-weight: 500; }
-  .status-text.done { color: #22c55e; }
-  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 4px rgba(201,168,76,0.2); } 50% { box-shadow: 0 0 0 8px rgba(201,168,76,0.1); } }
-  .results { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; display: none; }
-  .results.active { display: block; }
-  .result-header { background: #fff; border-radius: 20px; padding: 32px 40px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(10,14,39,0.06); border: 1px solid #e8eaf0; }
-  .result-header h2 { font-size: 28px; font-weight: 800; color: #0a0e27; letter-spacing: -0.5px; }
-  .result-header .meta { display: flex; gap: 24px; margin-top: 12px; flex-wrap: wrap; }
-  .result-header .meta span { font-size: 14px; color: #5a6090; }
-  .result-header .meta strong { color: #0a0e27; font-weight: 600; }
-  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
-  .metric-card { background: #fff; border-radius: 16px; padding: 18px 20px; border: 1px solid #e8eaf0; box-shadow: 0 2px 8px rgba(10,14,39,0.04); }
-  .metric-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #8890b0; font-weight: 600; margin-bottom: 4px; }
-  .metric-value { font-size: 22px; font-weight: 700; color: #0a0e27; }
-  .metric-sub { font-size: 12px; color: #5a6090; margin-top: 2px; }
+  @keyframes fadePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.96); border-radius: 20px; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 50; padding: 40px; }
+  .loading-overlay.active { display: flex; }
+  .loading-spinner { width: 52px; height: 52px; border: 4px solid #e8eaf0; border-top-color: #c9a84c; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20px; }
+  .loading-title { font-size: 20px; font-weight: 700; color: #0a0e27; margin-bottom: 6px; }
+  .loading-sub { font-size: 14px; color: #8890b0; margin-bottom: 24px; }
+  .loading-steps { text-align: left; width: 100%; max-width: 400px; }
+  .loading-step { display: flex; align-items: center; gap: 12px; padding: 10px 0; font-size: 14px; color: #8890b0; border-bottom: 1px solid #f0f1f6; }
+  .loading-step:last-child { border-bottom: none; }
+  .loading-step .step-icon { width: 20px; text-align: center; flex-shrink: 0; font-size: 16px; }
+  .loading-step.active { color: #0a0e27; font-weight: 600; }
+  .loading-step.active .step-icon { animation: fadePulse 1.2s infinite; }
+  .loading-step.done { color: #22c55e; }
+  .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 32px; }
+  .step-dot { width: 40px; height: 4px; border-radius: 2px; background: #e0e2ea; transition: all 0.3s; }
+  .step-dot.active { background: #c9a84c; }
+  .step-dot.done { background: #22c55e; }
+  .step-label { font-size: 12px; color: #8890b0; text-align: center; margin-top: 6px; }
   .section-card { background: #fff; border-radius: 20px; padding: 32px 40px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(10,14,39,0.04); border: 1px solid #e8eaf0; }
   .section-title { font-size: 18px; font-weight: 700; color: #0a0e27; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
   .section-title .icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
@@ -71,18 +60,37 @@
   .icon-green { background: #e8faf0; color: #22c55e; }
   .icon-blue { background: #e8f0fe; color: #2563eb; }
   .icon-red { background: #fef0f0; color: #ef4444; }
+  .metric-card { background: #fff; border-radius: 16px; padding: 18px 20px; border: 1px solid #e8eaf0; box-shadow: 0 2px 8px rgba(10,14,39,0.04); }
+  .metric-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #8890b0; font-weight: 600; margin-bottom: 4px; }
+  .metric-value { font-size: 22px; font-weight: 700; color: #0a0e27; }
+  .metric-sub { font-size: 12px; color: #5a6090; margin-top: 2px; }
+  .chat-box { max-height: 400px; overflow-y: auto; padding: 20px; border: 1px solid #e8eaf0; border-radius: 16px; background: #fafbfe; margin-bottom: 16px; }
+  .chat-msg { margin-bottom: 16px; max-width: 80%; }
+  .chat-msg.agent { margin-right: auto; }
+  .chat-msg.user { margin-left: auto; text-align: right; }
+  .chat-bubble { padding: 12px 18px; border-radius: 16px; font-size: 14px; line-height: 1.5; display: inline-block; text-align: left; }
+  .chat-msg.agent .chat-bubble { background: #fff; border: 1px solid #e0e2ea; border-bottom-left-radius: 4px; }
+  .chat-msg.user .chat-bubble { background: #0a0e27; color: #fff; border-bottom-right-radius: 4px; }
+  .chat-input-row { display: flex; gap: 10px; }
+  .chat-input-row input { flex: 1; padding: 12px 16px; border: 2px solid #e8eaf0; border-radius: 12px; font-size: 14px; }
+  .chat-input-row input:focus { outline: none; border-color: #c9a84c; }
+  .prompt-card { display: inline-block; padding: 12px 18px; background: #fafbfe; border: 2px solid #e8eaf0; border-radius: 14px; cursor: pointer; transition: all 0.2s; margin: 6px; font-size: 13px; font-weight: 500; color: #3a3e60; }
+  .prompt-card:hover { border-color: #c9a84c; background: #fef7e8; transform: translateY(-2px); }
+  .prompt-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 20px 0; }
+  .upload-zone { border: 2px dashed #d0d4e0; border-radius: 12px; padding: 24px; text-align: center; color: #5a6090; font-size: 14px; cursor: pointer; transition: all 0.2s; background: #fafbfe; }
+  .upload-zone:hover { border-color: #c9a84c; background: #fef7e8; }
+  .upload-zone.dragover { border-color: #c9a84c; background: #fef7e8; }
+  .upload-zone.has-files { border-color: #22c55e; background: #f0fdf4; }
+  .file-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #e8f0fe; border-radius: 20px; font-size: 12px; color: #2563eb; margin: 4px; }
+  .file-badge .remove { cursor: pointer; color: #ef4444; font-weight: 700; margin-left: 4px; }
+  .tab-bar { display: flex; gap: 4px; background: #f0f1f6; border-radius: 12px; padding: 4px; margin-bottom: 24px; }
+  .tab-btn { flex: 1; padding: 10px 16px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: transparent; color: #5a6090; }
+  .tab-btn.active { background: #fff; color: #0a0e27; box-shadow: 0 2px 8px rgba(10,14,39,0.08); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
   .exec-summary { font-size: 15px; line-height: 1.8; color: #3a3e60; }
-  .framework-badge { display: inline-block; padding: 6px 16px; background: #f0f1f6; border-radius: 20px; font-size: 13px; font-weight: 500; color: #3a3e60; margin: 4px 6px 4px 0; border: 1px solid #e0e2ea; }
   .finding-item { padding: 16px 20px; border-left: 3px solid #c9a84c; background: #fafbfe; border-radius: 0 12px 12px 0; margin-bottom: 10px; font-size: 14px; line-height: 1.6; color: #3a3e60; }
   .finding-num { font-weight: 700; color: #c9a84c; margin-right: 8px; }
-  .detailed-analysis { font-size: 15px; line-height: 1.8; color: #3a3e60; }
-  .detailed-analysis h1,.detailed-analysis h2,.detailed-analysis h3 { color: #0a0e27; margin-top: 24px; margin-bottom: 12px; font-weight: 700; }
-  .detailed-analysis h2 { font-size: 20px; }
-  .detailed-analysis h3 { font-size: 17px; }
-  .detailed-analysis p { margin-bottom: 12px; }
-  .detailed-analysis ul,.detailed-analysis ol { padding-left: 24px; margin-bottom: 12px; }
-  .detailed-analysis li { margin-bottom: 4px; }
-  .detailed-analysis strong { color: #0a0e27; }
   .rec-card { padding: 20px 24px; background: linear-gradient(135deg, #fef7e8, #fff8ee); border-radius: 16px; border-left: 4px solid #c9a84c; margin-bottom: 12px; }
   .rec-card .rec-num { font-weight: 700; color: #c9a84c; font-size: 14px; display: block; margin-bottom: 4px; }
   .rec-card .rec-text { font-size: 14px; line-height: 1.6; color: #3a3e60; }
@@ -94,31 +102,48 @@
   .source-link { display: block; padding: 10px 16px; border-bottom: 1px solid #f0f1f6; font-size: 13px; color: #2563eb; text-decoration: none; transition: all 0.2s; }
   .source-link:hover { background: #f8f9fc; }
   .source-link:last-child { border-bottom: none; }
-  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-  .chart-single { margin-bottom: 24px; }
-  .chart-container { background: #fff; border-radius: 20px; padding: 24px; border: 1px solid #e8eaf0; box-shadow: 0 2px 8px rgba(10,14,39,0.04); }
-  .chart-container h3 { font-size: 15px; font-weight: 600; color: #0a0e27; margin-bottom: 16px; }
-  .error-banner { background: #fef0f0; border: 1px solid #fecaca; border-radius: 12px; padding: 16px 20px; color: #dc2626; font-size: 14px; margin-bottom: 20px; display: none; }
   .competitor-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .competitor-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #e8eaf0; color: #8890b0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; }
   .competitor-table td { padding: 10px 12px; border-bottom: 1px solid #f0f1f6; color: #3a3e60; }
   .competitor-table tr:hover td { background: #f8f9fc; }
-  .competitor-table .primary { font-weight: 600; color: #0a0e27; }
-  .benchmark-score { display: flex; align-items: center; gap: 20px; padding: 20px; }
-  .score-ring { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; color: #fff; flex-shrink: 0; }
-  .score-ring.strong { background: linear-gradient(135deg, #22c55e, #16a34a); }
-  .score-ring.average { background: linear-gradient(135deg, #f59e0b, #d97706); }
-  .score-ring.weak { background: linear-gradient(135deg, #ef4444, #dc2626); }
-  .score-ring .label { font-size: 20px; color: #fff; }
-  @media (max-width: 768px) {
-    .input-grid { grid-template-columns: 1fr; }
-    .chart-row { grid-template-columns: 1fr; }
-    .nav { padding: 0 20px; }
-    .hero h1 { font-size: 28px; }
-    .input-card, .section-card, .result-header { padding: 20px; }
-    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-    .benchmark-score { flex-direction: column; text-align: center; }
-  }
+  .competitor-table td.primary { font-weight: 600; color: #0a0e27; }
+  .competitor-table tr.primary td { background: #fef7e8; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .ba-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .ba-table th { text-align: left; padding: 12px 16px; background: #f8f9fc; border-bottom: 2px solid #e8eaf0; color: #3a3e60; font-weight: 700; }
+  .ba-table td { padding: 12px 16px; border-bottom: 1px solid #f0f1f6; }
+  .ba-table .change { font-weight: 600; }
+  .ba-table .change.positive { color: #22c55e; }
+  .ba-table .change.negative { color: #ef4444; }
+  .ba-table .change.neutral { color: #f59e0b; }
+  .error-banner { background: #fef0f0; border: 1px solid #fecaca; border-radius: 12px; padding: 16px 20px; color: #dc2626; font-size: 14px; margin-bottom: 20px; display: none; }
+  .detailed-analysis h1,.detailed-analysis h2,.detailed-analysis h3 { color: #0a0e27; margin-top: 24px; margin-bottom: 12px; font-weight: 700; }
+  .detailed-analysis h2 { font-size: 20px; }
+  .detailed-analysis h3 { font-size: 17px; }
+  .detailed-analysis p { margin-bottom: 12px; }
+  .detailed-analysis ul,.detailed-analysis ol { padding-left: 24px; margin-bottom: 12px; }
+  .detailed-analysis li { margin-bottom: 4px; }
+  .detailed-analysis strong { color: #0a0e27; }
+  .results { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; display: none; }
+  .results.active { display: block; }
+  .status-bar { max-width: 820px; margin: 20px auto 0; background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(10,14,39,0.06); border: 1px solid #e8eaf0; display: none; }
+  .status-bar.active { display: block; }
+  .status-step { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid #f0f1f6; }
+  .status-step:last-child { border-bottom: none; }
+  .status-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; background: #e0e2ea; transition: all 0.3s; }
+  .status-dot.active { background: #c9a84c; box-shadow: 0 0 0 4px rgba(201,168,76,0.2); animation: pulse 1.5s infinite; }
+  .status-dot.done { background: #22c55e; }
+  .status-text { font-size: 14px; color: #5a6090; font-weight: 500; }
+  .status-text.done { color: #22c55e; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 4px rgba(201,168,76,0.2); } 50% { box-shadow: 0 0 0 8px rgba(201,168,76,0.1); } }
+  .step-section { display: none; }
+  .step-section.active { display: block; }
+  .data-hint { background: #eef1ff; border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #4f46e5; margin-bottom: 16px; }
+  .verdict-box { background: linear-gradient(135deg, #0a0e27, #1a1a3e); color: #fff; border-radius: 16px; padding: 32px; margin-bottom: 24px; }
+  .verdict-box h3 { color: #c9a84c; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .verdict-box p { font-size: 18px; line-height: 1.6; color: #e0e2f0; }
+  .benefit-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 20px 0; }
+  .benefit-item { background: #f0fdf4; border-radius: 12px; padding: 16px; border-left: 3px solid #22c55e; font-size: 13px; color: #166534; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -128,155 +153,394 @@
     <div class="nav-logo">CA</div>
     <div>
       <div class="nav-title">Consulting Agent AI</div>
-      <div class="nav-tagline">AI-Powered Strategy Intelligence</div>
+      <div class="nav-tagline">Strategy Analysis, On Demand</div>
     </div>
   </div>
-  <div style="color:#5a6090;font-size:13px;font-weight:500;">v1.0 &mdash; Gemini 2.5</div>
 </div>
 
 <div class="hero">
-  <h1>Strategy Analysis, On Demand</h1>
-  <p>Deep-dive consulting analysis with financial trends, competitive benchmarks, and document intelligence.</p>
+  <h1>What business issue are you facing?</h1>
+  <p>Describe your challenge — profitability, restructuring, growth, or anything else. Our AI will ask clarifying questions, analyze your data, and deliver a consulting-grade recommendation.</p>
+</div>
 
-  <div class="input-card">
-    <form id="analyzeForm">
-      <div class="input-grid">
-        <div>
-          <label for="company">Company Name</label>
-          <input type="text" id="company" placeholder="e.g. Apple, Tesla, Nvidia" required>
-        </div>
-        <div>
-          <label for="ticker">Stock Ticker (optional)</label>
-          <input type="text" id="ticker" placeholder="e.g. AAPL, TSLA, NVDA">
-        </div>
-      </div>
-      <div class="input-full">
-        <label for="question">Business Question</label>
-        <textarea id="question" placeholder="e.g. Should Tesla enter the electric boat market? Analyze market size, competition, and strategic fit..." required></textarea>
-      </div>
-      <div class="input-full" style="margin-bottom:20px;">
-        <label>Supporting Documents (optional)</label>
-        <div class="upload-zone" id="uploadZone">
-          <div id="uploadPlaceholder">
-            <div style="font-size:32px;margin-bottom:8px;">&#128196;</div>
-            <div>Drop PDF, TXT, or MD files here, or <strong style="color:#2563eb;">click to browse</strong></div>
-            <div style="font-size:12px;color:#8890b0;margin-top:4px;">Annual reports, earnings transcripts, competitive analysis</div>
-          </div>
-          <div id="uploadFiles" style="display:none;"></div>
-          <input type="file" id="fileInput" multiple accept=".pdf,.txt,.md,.csv,.json" style="display:none;">
-        </div>
-      </div>
-      <button type="submit" class="btn-primary" id="analyzeBtn"><span class="spinner"></span>Run Analysis</button>
-    </form>
+<div class="input-card" id="appCard">
+  <div class="step-indicator" id="stepIndicator">
+    <div><div class="step-dot active" id="step1Dot"></div><div class="step-label">Issue</div></div>
+    <div><div class="step-dot" id="step2Dot"></div><div class="step-label">Discovery</div></div>
+    <div><div class="step-dot" id="step3Dot"></div><div class="step-label">Data</div></div>
+    <div><div class="step-dot" id="step4Dot"></div><div class="step-label">Results</div></div>
   </div>
 
+  <!-- Step 1: Issue Description -->
+  <div class="step-section active" id="step1">
+    <label class="input-full">Describe your business issue</label>
+    <textarea id="issueInput" placeholder="e.g. We need to reduce headcount by 20% while maintaining product velocity. Current engineering team is 80 people..." style="min-height:120px;"></textarea>
+    <div class="prompt-grid">
+      <div class="prompt-card" onclick="setPrompt('Our profit margins have been declining for 3 quarters. We need to identify cost reduction opportunities and improve pricing strategy.')">📉 Profitability</div>
+      <div class="prompt-card" onclick="setPrompt('We want to expand into a new geographic market. Need analysis on market size, entry strategy, and expected timeline.')">📈 Growth</div>
+      <div class="prompt-card" onclick="setPrompt('We need to hire 50 engineers this quarter. What should our hiring plan, budget, and timeline look like?')">👋 Hiring</div>
+      <div class="prompt-card" onclick="setPrompt('We need to reduce headcount by 20% to cut costs. Help us identify the optimal approach that minimizes business disruption.')">✂️ Restructuring</div>
+      <div class="prompt-card" onclick="setPrompt('We are considering acquiring a competitor. Evaluate the strategic fit, financial implications, and integration risks.')">⚔️ Merger</div>
+      <div class="prompt-card" onclick="setPrompt('Our production cycle time has increased 30%. Help identify bottlenecks and recommend process improvements.')">🔧 Operations</div>
+      <div class="prompt-card" onclick="setPrompt('Our market share is declining. We need a competitive strategy to defend our position and identify growth adjacencies.')">🎯 Strategy</div>
+      <div class="prompt-card" onclick="setPrompt('We have a unique business challenge:')">❓ Other</div>
+    </div>
+    <div class="input-grid">
+      <div>
+        <label>Company Name</label>
+        <input id="companyInput" placeholder="e.g. Acme Corp" value="">
+      </div>
+      <div>
+        <label>Stock Ticker (optional)</label>
+        <input id="tickerInput" placeholder="e.g. AAPL, TSLA">
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:8px;">
+      <button class="btn-primary" id="startDiscoveryBtn" onclick="startDiscovery()">Start Discovery</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Clarifying Conversation -->
+  <div class="step-section" id="step2">
+    <div id="dataHint" class="data-hint" style="display:none;"></div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="chat-input-row">
+      <input id="chatInput" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="btn-secondary" onclick="sendChat()">Send</button>
+      <button class="btn-primary" id="runAnalysisBtn" style="width:auto;padding:10px 24px;" onclick="runAnalysis()">Run Analysis</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Upload Data (shown inline during discovery) -->
+  <div class="step-section" id="step3">
+    <p style="color:#5a6090;font-size:14px;margin-bottom:16px;" id="uploadHint">Upload supporting documents to enhance the analysis <strong>(optional)</strong>.</p>
+    <div class="upload-zone" id="uploadZone">
+      <div id="uploadPlaceholder">
+        <div style="font-size:32px;margin-bottom:8px;">&#128196;</div>
+        <div>Drop files here, or <strong style="color:#2563eb;">click to browse</strong></div>
+        <div style="font-size:12px;color:#8890b0;margin-top:4px;">CSV, PDF, TXT, MD, JSON</div>
+      </div>
+      <div id="uploadFiles" style="display:none;"></div>
+      <input type="file" id="fileInput" multiple accept=".csv,.pdf,.txt,.md,.json" style="display:none;">
+    </div>
+    <div style="display:flex;gap:12px;margin-top:16px;">
+      <button class="btn-secondary" onclick="showStep(2)">← Back to Chat</button>
+      <button class="btn-primary" id="runAnalysisFromUploadBtn" onclick="runAnalysis()">Run Analysis Now</button>
+    </div>
+  </div>
+
+  <div class="step-section" id="step4" style="display:none;"></div>
+
+  <!-- Status Bar -->
   <div class="status-bar" id="statusBar">
-    <div class="status-step" id="step1"><div class="status-dot" id="dot1"></div><div class="status-text" id="text1">Classifying engagement type</div></div>
-    <div class="status-step" id="step2"><div class="status-dot" id="dot2"></div><div class="status-text" id="text2">Retrieving consulting frameworks</div></div>
-    <div class="status-step" id="step3"><div class="status-dot" id="dot3"></div><div class="status-text" id="text3">Researching company &amp; market data</div></div>
-    <div class="status-step" id="step4"><div class="status-dot" id="dot4"></div><div class="status-text" id="text4">Deep analysis (Gemini 2.5 Pro)</div></div>
-    <div class="status-step" id="step5"><div class="status-dot" id="dot5"></div><div class="status-text" id="text5">Deep research loop &amp; gap analysis</div></div>
-    <div class="status-step" id="step6"><div class="status-dot" id="dot6"></div><div class="status-text" id="text6">Generating recommendations &amp; risk assessment</div></div>
+    <div class="status-step"><div class="status-dot" id="adot1"></div><div class="status-text" id="atext1">Analyzing issue & data</div></div>
+    <div class="status-step"><div class="status-dot" id="adot2"></div><div class="status-text" id="atext2">Researching market & financials</div></div>
+    <div class="status-step"><div class="status-dot" id="adot3"></div><div class="status-text" id="atext3">Deep analysis (Gemini Pro)</div></div>
+    <div class="status-step"><div class="status-dot" id="adot4"></div><div class="status-text" id="atext4">Generating recommendations & before/after</div></div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-title">Consulting Agent is thinking...</div>
+    <div class="loading-sub">This usually takes 2-3 minutes depending on complexity</div>
+    <div class="loading-steps">
+      <div class="loading-step" id="lstep1"><span class="step-icon">⚡</span> Analyzing your issue & data</div>
+      <div class="loading-step" id="lstep2"><span class="step-icon">⏳</span> Researching market & financials</div>
+      <div class="loading-step" id="lstep3"><span class="step-icon">⏳</span> Deep analysis with AI models</div>
+      <div class="loading-step" id="lstep4"><span class="step-icon">⏳</span> Generating recommendations & comparison</div>
+    </div>
   </div>
 
   <div class="error-banner" id="errorBanner"></div>
 </div>
 
+<!-- Results -->
 <div class="results" id="results">
   <div class="result-header" id="resultHeader">
     <h2 id="resultTitle"></h2>
-    <div class="meta">
-      <span>Question: <strong id="resultQuestion"></strong></span>
-      <span>Engagement: <strong id="resultEngagement"></strong></span>
-      <span>Generated: <strong id="resultDate"></strong></span>
+    <div class="meta"><span><strong>Issue:</strong> <span id="resultIssue"></span></span><span><strong>Type:</strong> <span id="resultType"></span></span></div>
+  </div>
+
+  <div class="tab-bar" id="resultTabs">
+    <button class="tab-btn active" data-tab="overview">Executive Overview</button>
+    <button class="tab-btn" data-tab="detailed">Detailed Analysis</button>
+    <button class="tab-btn" data-tab="beforeafter">Before vs After</button>
+  </div>
+
+  <!-- Tab 1: Overview -->
+  <div class="tab-content active" id="tabOverview">
+    <div class="verdict-box" id="verdictBox" style="display:none;"></div>
+
+    <div class="section-card">
+      <div class="section-title"><div class="icon icon-purple">★</div>Executive Summary</div>
+      <div class="exec-summary" id="execSummary"></div>
+    </div>
+
+    <div class="section-card" id="sectionFrameworks">
+      <div class="section-title"><div class="icon icon-gold">⚙</div>Frameworks Applied</div>
+      <div id="frameworksList"></div>
+    </div>
+
+    <div class="section-card" id="sectionBenefits" style="display:none;">
+      <div class="section-title"><div class="icon icon-green">✓</div>Key Benefits</div>
+      <div class="benefit-list" id="benefitList"></div>
+    </div>
+
+    <div class="section-card" id="sectionFindings">
+      <div class="section-title"><div class="icon icon-red">⚠</div>Key Findings</div>
+      <div id="findingsList"></div>
+    </div>
+
+    <div class="section-card" id="sectionRecs">
+      <div class="section-title"><div class="icon icon-gold">✓</div>Recommendations</div>
+      <div id="recommendationsList"></div>
+    </div>
+
+    <div class="section-card" id="sectionRisks">
+      <div class="section-title"><div class="icon icon-red">⚠</div>Risk Assessment</div>
+      <div id="risksList"></div>
     </div>
   </div>
 
-  <div class="metrics-grid" id="metricsGrid"></div>
+  <!-- Tab 2: Detailed Analysis -->
+  <div class="tab-content" id="tabDetailed">
+    <div class="metrics-grid" id="metricsGrid"></div>
+    <div class="chart-row" id="baChartRow" style="display:none;">
+      <div class="chart-container"><h3>Before vs After Comparison</h3><div id="chartBeforeAfter"></div></div>
+      <div class="chart-container"><h3>Cost & Resource Breakdown</h3><div id="chartResourceBreakdown"></div></div>
+    </div>
+    <div class="chart-row" id="chartRow" style="display:none;">
+      <div class="chart-container"><h3>Revenue & Profit Breakdown</h3><div id="chartRevenue"></div></div>
+      <div class="chart-container"><h3>Stock Performance</h3><div id="chartStock"></div></div>
+    </div>
+    <div class="chart-single" id="chartMultiYearRow" style="display:none;">
+      <div class="chart-container"><h3>Multi-Year Financial Performance</h3><div id="chartMultiYear"></div></div>
+    </div>
 
-  <div class="chart-row" id="chartRow">
-    <div class="chart-container"><h3>Revenue &amp; Profit Trend</h3><div id="chartRevenue"></div></div>
-    <div class="chart-container"><h3>Stock Performance</h3><div id="chartStock"></div></div>
+    <div class="section-card" id="sectionBenchmark" style="display:none;">
+      <div class="section-title"><div class="icon icon-purple">⚖</div>Industry Benchmark Score</div>
+      <div id="benchmarkScore"></div>
+    </div>
+
+    <div class="section-card" id="sectionCompetitors" style="display:none;">
+      <div class="section-title"><div class="icon icon-blue">👥</div>Competitor Comparison</div>
+      <div id="competitorTable"></div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title"><div class="icon icon-gold">📊</div>Detailed Analysis</div>
+      <div class="detailed-analysis" id="analysisContent"></div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title"><div class="icon icon-blue">🔗</div>Sources</div>
+      <div id="sourcesList"></div>
+    </div>
   </div>
 
-  <div class="chart-single" id="chartMultiYearRow" style="display:none;">
-    <div class="chart-container"><h3>Multi-Year Financial Performance</h3><div id="chartMultiYear"></div></div>
-  </div>
-
-  <div class="section-card" id="sectionBenchmark" style="display:none;">
-    <div class="section-title"><div class="icon icon-gold">&#9878;</div>Industry Benchmark Score</div>
-    <div class="benchmark-score" id="benchmarkScore"></div>
-  </div>
-
-  <div class="section-card" id="sectionCompetitors" style="display:none;">
-    <div class="section-title"><div class="icon icon-purple">&#128101;</div>Competitor Comparison</div>
-    <div id="competitorTable"></div>
-  </div>
-
-  <div class="section-card" id="sectionExecSummary">
-    <div class="section-title"><div class="icon icon-purple">&#9733;</div>Executive Summary</div>
-    <div class="exec-summary" id="execSummary"></div>
-  </div>
-
-  <div class="section-card" id="sectionFrameworks">
-    <div class="section-title"><div class="icon icon-blue">&#9881;</div>Frameworks Applied</div>
-    <div id="frameworksList"></div>
-  </div>
-
-  <div class="section-card" id="sectionFindings">
-    <div class="section-title"><div class="icon icon-gold">&#9888;</div>Key Findings</div>
-    <div id="findingsList"></div>
-  </div>
-
-  <div class="section-card" id="sectionAnalysis">
-    <div class="section-title"><div class="icon icon-blue">&#128202;</div>Detailed Analysis</div>
-    <div class="detailed-analysis" id="analysisContent"></div>
-  </div>
-
-  <div class="section-card" id="sectionRecommendations">
-    <div class="section-title"><div class="icon icon-green">&#10003;</div>Recommendations</div>
-    <div id="recommendationsList"></div>
-  </div>
-
-  <div class="section-card" id="sectionRisks">
-    <div class="section-title"><div class="icon icon-red">&#9888;</div>Risk Assessment</div>
-    <div id="risksList"></div>
-  </div>
-
-  <div class="section-card" id="sectionSources">
-    <div class="section-title"><div class="icon icon-blue">&#128279;</div>Sources</div>
-    <div id="sourcesList"></div>
+  <!-- Tab 3: Before / After -->
+  <div class="tab-content" id="tabBeforeAfter">
+    <div class="section-card">
+      <div class="section-title"><div class="icon icon-gold">📊</div>Before vs After Comparison</div>
+      <div id="beforeSummary" class="exec-summary" style="margin-bottom:16px;"></div>
+      <div id="baTable"></div>
+      <div id="afterSummary" class="exec-summary" style="margin-top:16px;"></div>
+    </div>
+    <div class="section-card" id="sectionBAVerdict">
+      <div class="section-title"><div class="icon icon-purple">★</div>Verdict</div>
+      <div id="baVerdict" class="exec-summary"></div>
+    </div>
   </div>
 </div>
 
 <script>
-const form = document.getElementById('analyzeForm');
-const btn = document.getElementById('analyzeBtn');
-const statusBar = document.getElementById('statusBar');
-const resultsSection = document.getElementById('results');
-const errorBanner = document.getElementById('errorBanner');
+// ── State ──
+let conversation = [];
+let issueType = "";
+let issueText = "";
+let companyName = "";
+let tickerVal = "";
+let uploadedFiles = [];
+
+// ── Step Navigation ──
+function showStep(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById('step' + i + 'Dot');
+    dot.className = 'step-dot';
+    if (i < n) dot.classList.add('done');
+    else if (i === n) dot.classList.add('active');
+  }
+}
+
+// ── Prompt Cards ──
+function setPrompt(text) {
+  document.getElementById('issueInput').value = text;
+}
+
+// ── Start Discovery ──
+async function startDiscovery() {
+  issueText = document.getElementById('issueInput').value.trim();
+  companyName = document.getElementById('companyInput').value.trim();
+  tickerVal = document.getElementById('tickerInput').value.trim();
+
+  if (!issueText) { showError('Please describe your business issue.'); return; }
+  if (!companyName) { showError('Please enter a company name.'); return; }
+
+  document.getElementById('startDiscoveryBtn').disabled = true;
+  document.getElementById('startDiscoveryBtn').innerHTML = '<span class="spinner"></span>Analyzing...';
+
+  try {
+    const resp = await fetch('/api/engage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        issue: issueText,
+        company: companyName,
+        ticker: tickerVal,
+        conversation: [],
+      }),
+    });
+    if (!resp.ok) throw new Error(await resp.text() || 'Server error');
+
+    const data = await resp.json();
+    issueType = data.issue_type || '';
+    const questions = data.questions || [];
+
+    // Show first agent message
+    const chatBox = document.getElementById('chatBox');
+    chatBox.innerHTML = '';
+    const introMsg = document.createElement('div');
+    introMsg.className = 'chat-msg agent';
+    introMsg.innerHTML = `<div class="chat-bubble">Thank you. Here's what I understand so far:<br><br><em>"${data.understanding || ''}"</em><br><br>I have a few questions to clarify:</div>`;
+    chatBox.appendChild(introMsg);
+
+    questions.forEach(q => {
+      const msg = document.createElement('div');
+      msg.className = 'chat-msg agent';
+      msg.innerHTML = `<div class="chat-bubble">${q}</div>`;
+      chatBox.appendChild(msg);
+    });
+
+    // Show data hint if available
+    if (data.additional_data_hint) {
+      const hint = document.getElementById('dataHint');
+      hint.textContent = '💡 ' + data.additional_data_hint;
+      hint.style.display = 'block';
+    }
+
+    showStep(2);
+    document.getElementById('chatInput').focus();
+
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    document.getElementById('startDiscoveryBtn').disabled = false;
+    document.getElementById('startDiscoveryBtn').innerHTML = 'Start Discovery';
+  }
+}
+
+// ── Chat Send ──
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  // Add user message to chat
+  const chatBox = document.getElementById('chatBox');
+  const userMsg = document.createElement('div');
+  userMsg.className = 'chat-msg user';
+  userMsg.innerHTML = `<div class="chat-bubble">${text}</div>`;
+  chatBox.appendChild(userMsg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  // Add to conversation
+  conversation.push({ role: "user", content: text });
+
+  // Show typing indicator
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg agent';
+  typing.id = 'typingIndicator';
+  typing.innerHTML = `<div class="chat-bubble" style="color:#8890b0;"><em>Thinking...</em></div>`;
+  chatBox.appendChild(typing);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  try {
+    const resp = await fetch('/api/engage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        issue: issueText,
+        company: companyName,
+        ticker: tickerVal,
+        issue_type: issueType,
+        conversation: conversation,
+      }),
+    });
+    if (!resp.ok) throw new Error(await resp.text() || 'Server error');
+
+    const data = await resp.json();
+    issueType = data.issue_type || issueType;
+
+    // Remove typing indicator
+    document.getElementById('typingIndicator')?.remove();
+
+    // Add agent response
+    conversation.push({ role: "assistant", content: JSON.stringify(data) });
+
+    if (data.questions && data.questions.length > 0) {
+      data.questions.forEach(q => {
+        const msg = document.createElement('div');
+        msg.className = 'chat-msg agent';
+        msg.innerHTML = `<div class="chat-bubble">${q}</div>`;
+        chatBox.appendChild(msg);
+      });
+    }
+
+    // Update understanding text
+    if (data.understanding) {
+      // Show understanding silently
+    }
+
+    // Show data hint
+    if (data.additional_data_hint) {
+      const hint = document.getElementById('dataHint');
+      hint.textContent = '💡 ' + data.additional_data_hint;
+      hint.style.display = 'block';
+    }
+
+    // If ready, highlight the Run Analysis button
+    if (data.next_action === 'ready') {
+      const btn = document.getElementById('runAnalysisBtn');
+      btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+      btn.innerHTML = 'Run Analysis →';
+      // Add a ready message
+      const readyMsg = document.createElement('div');
+      readyMsg.className = 'chat-msg agent';
+      readyMsg.innerHTML = `<div class="chat-bubble" style="background:#f0fdf4;border-color:#22c55e;color:#166534;"><strong>I have enough information to proceed.</strong> Click "Run Analysis" to get your full consulting report.</div>`;
+      chatBox.appendChild(readyMsg);
+    }
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+  } catch (err) {
+    document.getElementById('typingIndicator')?.remove();
+    const errMsg = document.createElement('div');
+    errMsg.className = 'chat-msg agent';
+    errMsg.innerHTML = `<div class="chat-bubble" style="background:#fef0f0;color:#dc2626;">Sorry, I encountered an error: ${err.message}. Please try again.</div>`;
+    chatBox.appendChild(errMsg);
+  }
+}
+
+// ── Upload Handling ──
 const uploadZone = document.getElementById('uploadZone');
 const fileInput = document.getElementById('fileInput');
 const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 const uploadFilesDiv = document.getElementById('uploadFiles');
-let uploadedFiles = [];
 
-const steps = [
-  'dot1','text1','step1','dot2','text2','step2','dot3','text3','step3',
-  'dot4','text4','step4','dot5','text5','step5','dot6','text6','step6'
-];
-
-function setStep(idx, state) {
-  const base = idx * 3;
-  document.getElementById(steps[base]).className = 'status-dot ' + state;
-  document.getElementById(steps[base + 1]).className = 'status-text ' + (state === 'done' ? 'done' : '');
-}
-function resetSteps() {
-  for (let i = 0; i < 6; i++) setStep(i, '');
-  statusBar.classList.remove('active');
-}
-
-// File upload handling
 uploadZone.addEventListener('click', () => fileInput.click());
 uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
@@ -314,85 +578,241 @@ function renderFileBadges() {
   }
 }
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  errorBanner.style.display = 'none';
-  resultsSection.classList.remove('active');
-  resetSteps();
-  statusBar.classList.add('active');
-  btn.disabled = true;
-  btn.textContent = 'Analyzing...';
-
-  const company = document.getElementById('company').value.trim();
-  const ticker = document.getElementById('ticker').value.trim() || '';
-  const question = document.getElementById('question').value.trim();
-
-  if (!company || !question) { showError('Please fill in company name and question.'); return; }
+// ── Run Analysis ──
+async function runAnalysis() {
+  showStep(3);
+  showLoading();
+  setLoadingStep(1);
 
   try {
-    setStep(0, 'active'); await sleep(500);
-
-    setStep(0, 'done'); setStep(1, 'active'); await sleep(300);
-    setStep(1, 'done'); setStep(2, 'active'); await sleep(300);
-
     let resp;
     if (uploadedFiles.length > 0) {
       const formData = new FormData();
-      formData.append('company', company);
-      formData.append('question', question);
-      if (ticker) formData.append('ticker', ticker);
+      formData.append('issue', issueText);
+      formData.append('company', companyName);
+      formData.append('ticker', tickerVal);
+      formData.append('issue_type', issueType);
+      formData.append('conversation', JSON.stringify(conversation));
       for (const f of uploadedFiles) formData.append('files', f);
-      resp = await fetch('/api/analyze-with-files', { method: 'POST', body: formData });
+      resp = await fetch('/api/run-analysis-with-files', { method: 'POST', body: formData });
     } else {
-      resp = await fetch('/api/analyze', {
+      resp = await fetch('/api/run-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ company, question, ticker: ticker || null }),
+        body: JSON.stringify({
+          issue: issueText,
+          company: companyName,
+          ticker: tickerVal,
+          issue_type: issueType,
+          conversation: conversation,
+        }),
       });
     }
-    if (!resp.ok) throw new Error(await resp.text() || `Server error: ${resp.status}`);
+    if (!resp.ok) throw new Error(await resp.text() || 'Server error');
 
-    setStep(2, 'done'); setStep(3, 'active'); await sleep(400);
-    setStep(3, 'done'); setStep(4, 'active'); await sleep(400);
-    setStep(4, 'done'); setStep(5, 'active'); await sleep(400);
-    setStep(5, 'done');
+    setLoadingStep(2);
+    await sleep(400);
+    setLoadingStep(3);
 
     const data = await resp.json();
+    await sleep(400);
+
+    setLoadingStep(4);
     await sleep(300);
-    statusBar.classList.remove('active');
-    btn.disabled = false;
-    btn.textContent = 'Run Analysis';
+    hideLoading();
+
     renderResults(data);
+    showStep(4);
+    document.getElementById('results').classList.add('active');
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   } catch (err) {
+    hideLoading();
     showError(err.message);
-    btn.disabled = false;
-    btn.textContent = 'Run Analysis';
-    statusBar.classList.remove('active');
   }
-});
-
-function showError(msg) { errorBanner.textContent = 'Error: ' + msg; errorBanner.style.display = 'block'; }
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function fmtCurrency(val) {
-  if (!val && val !== 0) return 'N/A';
-  if (Math.abs(val) >= 1e12) return '$' + (val / 1e12).toFixed(2) + 'T';
-  if (Math.abs(val) >= 1e9) return '$' + (val / 1e9).toFixed(2) + 'B';
-  if (Math.abs(val) >= 1e6) return '$' + (val / 1e6).toFixed(1) + 'M';
-  if (Math.abs(val) >= 1e3) return '$' + (val / 1e3).toFixed(1) + 'K';
-  return '$' + Number(val).toLocaleString();
-}
-function fmtPct(val) { if (val === undefined || val === null || val === 'N/A') return 'N/A'; return (val * 100).toFixed(1) + '%'; }
-function fmtNum(val, dec) { if (val === undefined || val === null || val === 'N/A') return 'N/A'; return Number(val).toFixed(dec || 1); }
-function fmt(val, metric) {
-  if (val === undefined || val === null) return 'N/A';
-  const pct = ['revenue_growth','gross_margins','operating_margins','profit_margins','ebitda_margins','return_on_equity','return_on_assets'];
-  if (pct.includes(metric)) return (val * 100).toFixed(1) + '%';
-  if (['market_cap','revenue','enterprise_value','free_cashflow','ebitda','net_income'].includes(metric)) return fmtCurrency(val);
-  return fmtNum(val);
 }
 
+function setStatus(idx, state) {
+  const dot = document.getElementById('adot' + idx);
+  const text = document.getElementById('atext' + idx);
+  dot.className = 'status-dot ' + state;
+  if (state === 'done') text.classList.add('done');
+}
+
+// ── Result Rendering ──
+function renderResults(data) {
+  const analysis = data.analysis || {};
+  const recs = data.recommendations || {};
+  const fin = data.financials || {};
+  const ba = data.before_after || {};
+  const sources = data.company_data?.search_results || [];
+  const priceHist = data.price_history || {};
+  const multiYear = data.multi_year_financials || {};
+  const indBench = data.industry_benchmark || {};
+  const compBench = data.competitor_benchmark || {};
+  const compTable = compBench.comparison_table || [];
+
+  document.getElementById('resultTitle').textContent = data.engagement_type || 'Strategy Analysis';
+  document.getElementById('resultIssue').textContent = data.issue || '';
+  document.getElementById('resultType').textContent = data.issue_type || 'general';
+
+  // ── Executive Overview ──
+  document.getElementById('execSummary').textContent = analysis.executive_summary || 'Analysis complete.';
+
+  // Frameworks
+  document.getElementById('frameworksList').innerHTML = 'Standard consulting frameworks applied.';
+
+  // Key Benefits
+  if (ba.key_benefits && ba.key_benefits.length) {
+    document.getElementById('sectionBenefits').style.display = 'block';
+    document.getElementById('benefitList').innerHTML = ba.key_benefits.map(b => `<div class="benefit-item">${b}</div>`).join('');
+  } else {
+    document.getElementById('sectionBenefits').style.display = 'none';
+  }
+
+  // Verdict box
+  if (ba.verdict) {
+    document.getElementById('verdictBox').style.display = 'block';
+    document.getElementById('verdictBox').innerHTML = `<h3>Verdict</h3><p>${ba.verdict}</p>`;
+  }
+
+  // Findings
+  const findings = analysis.findings || [];
+  document.getElementById('findingsList').innerHTML = findings.length
+    ? findings.map((f,i) => `<div class="finding-item"><span class="finding-num">${i+1}.</span>${f}</div>`).join('')
+    : '<p style="color:#5a6090;">No specific findings identified.</p>';
+
+  // Recommendations
+  const recText = recs.recommendations || '';
+  const parsedRecs = parseRecs(recText);
+  document.getElementById('recommendationsList').innerHTML = parsedRecs.length
+    ? parsedRecs.map(r => `<div class="rec-card"><span class="rec-num">Recommendation ${r.num}</span><div class="rec-text">${r.text}</div></div>`).join('')
+    : `<div class="rec-card"><div class="rec-text">${recText}</div></div>`;
+
+  // Risks
+  const riskText = recs.risks || '';
+  const parsedRisks = parseRisks(riskText);
+  document.getElementById('risksList').innerHTML = parsedRisks.length
+    ? parsedRisks.map(r => `<div class="risk-card ${getSeverity(r.title)}"><div class="risk-title">${r.title}</div>${r.mitigation ? `<div class="risk-mitigation"><strong>Mitigation:</strong> ${r.mitigation}</div>` : ''}</div>`).join('')
+    : `<div class="risk-card high"><div class="risk-title">${riskText}</div></div>`;
+
+  // ── New Charts (from before/after data) ──
+  renderBeforeAfterChart(ba);
+  renderCostBreakdown(ba);
+
+  // ── Detailed Analysis Tab ──
+  // Metrics
+  const mt = [
+    {l:'Revenue',v:fmtCurrency(fin.revenue),s:fin.revenue_growth ? `${(fin.revenue_growth*100).toFixed(1)}% growth` : ''},
+    {l:'Market Cap',v:fmtCurrency(fin.market_cap),s:''},
+    {l:'Profit Margin',v:fmtPct(fin.profit_margins),s:''},
+    {l:'P/E Ratio',v:fin.pe_ratio ? fin.pe_ratio.toFixed(1) : 'N/A',s:`Fwd: ${fin.forward_pe ? fin.forward_pe.toFixed(1) : 'N/A'}`},
+    {l:'Free Cash Flow',v:fmtCurrency(fin.free_cashflow),s:''},
+    {l:'Return on Equity',v:fmtPct(fin.return_on_equity),s:''},
+  ];
+  const hasFin = Object.keys(fin).length > 1;
+  document.getElementById('metricsGrid').innerHTML = hasFin
+    ? mt.map(m => `<div class="metric-card"><div class="metric-label">${m.l}</div><div class="metric-value">${m.v}</div>${m.s ? `<div class="metric-sub">${m.s}</div>` : ''}</div>`).join('')
+    : '<p style="color:#5a6090;">No financial data available. Provide financial documents or a stock ticker for financial metrics.</p>';
+
+  // Charts
+  if (hasFin) {
+    renderRevenueChart(fin);
+    renderStockChart(priceHist, fin);
+    document.getElementById('chartRow').style.display = 'grid';
+  } else {
+    document.getElementById('chartRow').style.display = 'none';
+  }
+
+  if (multiYear.years && multiYear.years.length > 1) {
+    renderMultiYearChart(multiYear);
+    document.getElementById('chartMultiYearRow').style.display = 'block';
+  } else {
+    document.getElementById('chartMultiYearRow').style.display = 'none';
+  }
+
+  // Industry benchmark
+  if (indBench.overall_score !== undefined) {
+    document.getElementById('sectionBenchmark').style.display = 'block';
+    const rating = (indBench.overall_rating || 'Average').toLowerCase();
+    document.getElementById('benchmarkScore').innerHTML = `
+      <div class="score-ring ${rating}">${indBench.overall_score}</div>
+      <div>
+        <div style="font-size:18px;font-weight:700;color:#0a0e27;">${indBench.overall_rating || 'N/A'}</div>
+        <div style="font-size:13px;color:#5a6090;margin-top:4px;">${indBench.primary_name || data.company} vs industry peers</div>
+        <div style="font-size:13px;color:#5a6090;margin-top:6px;line-height:1.6;">${indBench.insight || ''}</div>
+      </div>`;
+  } else {
+    document.getElementById('sectionBenchmark').style.display = 'none';
+  }
+
+  // Competitor table
+  if (compTable.length > 0) {
+    document.getElementById('sectionCompetitors').style.display = 'block';
+    const metrics = ['market_cap','revenue','revenue_growth','gross_margins','operating_margins','profit_margins','ebitda_margins','pe_ratio','return_on_equity'];
+    const labels = ['Market Cap','Revenue','Growth','Gross Margin','Op. Margin','Net Margin','EBITDA Margin','P/E','ROE'];
+    const primaryTicker = (data.ticker || '').toUpperCase();
+    let html = `<div style="overflow-x:auto;"><table class="competitor-table"><thead><tr><th>Company</th>${labels.map(l => `<th>${l}</th>`).join('')}</tr></thead><tbody>`;
+    for (const row of compTable) {
+      const isPrimary = row.ticker.toUpperCase() === primaryTicker;
+      html += `<tr${isPrimary ? ' class="primary"' : ''}><td${isPrimary ? ' class="primary"' : ''}>${row.name || row.ticker}${isPrimary ? ' <span style="color:#c9a84c;font-size:11px;">· primary</span>' : ''}</td>`;
+      for (const m of metrics) html += `<td>${fmt(row[m], m)}</td>`;
+      html += '</tr>';
+    }
+    html += '</tbody></table></div>';
+    if (compBench.strengths && compBench.strengths.length) {
+      html += `<div style="margin-top:16px;padding:16px;background:#f0fdf4;border-radius:12px;border-left:3px solid #22c55e;"><strong style="color:#16a34a;">Strengths:</strong><ul style="margin:8px 0 0 20px;font-size:13px;color:#3a3e60;">${compBench.strengths.map(s => `<li>${s}</li>`).join('')}</ul></div>`;
+    }
+    if (compBench.weaknesses && compBench.weaknesses.length) {
+      html += `<div style="margin-top:12px;padding:16px;background:#fef0f0;border-radius:12px;border-left:3px solid #ef4444;"><strong style="color:#dc2626;">Areas to Improve:</strong><ul style="margin:8px 0 0 20px;font-size:13px;color:#3a3e60;">${compBench.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul></div>`;
+    }
+    document.getElementById('competitorTable').innerHTML = html;
+  } else {
+    document.getElementById('sectionCompetitors').style.display = 'none';
+  }
+
+  // Detailed analysis
+  if (analysis.detailed_analysis) {
+    document.getElementById('analysisContent').innerHTML = marked.parse(analysis.detailed_analysis);
+  }
+
+  // Sources
+  document.getElementById('sourcesList').innerHTML = sources.length
+    ? sources.slice(0,20).map(s => `<a href="${s.url}" target="_blank" class="source-link"><strong>${s.title || s.url}</strong>${s.snippet ? `<br><span style="color:#8890b0;font-size:12px;">${s.snippet.slice(0,120)}</span>` : ''}</a>`).join('')
+    : '<p style="color:#5a6090;padding:12px;">Web research and financial data analysis.</p>';
+
+  // ── Before/After Tab ──
+  if (ba.before_summary || ba.after_summary) {
+    document.getElementById('beforeSummary').textContent = ba.before_summary || '';
+    document.getElementById('afterSummary').textContent = ba.after_summary || '';
+    document.getElementById('baVerdict').textContent = ba.verdict || '';
+
+    const comp = ba.comparison || [];
+    if (comp.length) {
+      let baHtml = `<table class="ba-table"><thead><tr><th>Metric</th><th>Before</th><th>After</th><th>Change</th></tr></thead><tbody>`;
+      for (const row of comp) {
+        const cls = row.change && (row.change.includes('+') || row.change.includes('↓') || row.change.includes('reduced') || row.change.includes('improved'))
+          ? (row.change.includes('-') || row.change.includes('↓') || row.change.includes('reduced') ? 'positive' : 'positive')
+          : 'neutral';
+        baHtml += `<tr><td><strong>${row.metric}</strong></td><td>${row.before}</td><td>${row.after}</td><td class="change ${cls}">${row.change}</td></tr>`;
+      }
+      baHtml += '</tbody></table>';
+      document.getElementById('baTable').innerHTML = baHtml;
+    }
+  }
+
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab' + btn.dataset.tab.charAt(0).toUpperCase() + btn.dataset.tab.slice(1)).classList.add('active');
+    });
+  });
+}
+
+// ── Helpers ──
 function parseRecs(text) {
   if (!text) return [];
   const items = text.split(/\d+[.)]\s+/).filter(Boolean);
@@ -413,134 +833,111 @@ function parseRisks(text) {
   if (current) risks.push(current);
   return risks.length ? risks : [{ title: text, mitigation: '' }];
 }
-function getSeverity(t) { const l = t.toLowerCase(); return (l.includes('critical')||l.includes('existential')||l.includes('severe')||l.includes('high')) ? 'high' : 'medium'; }
-
-function renderResults(data) {
-  const eng = data.engagement || {}, fin = data.financials || {}, analysis = data.analysis || {};
-  const recs = data.recommendations || {}, fws = data.frameworks || [];
-  const sources = data.company_data?.search_results || [];
-  const priceHist = data.price_history || {};
-  const multiYear = data.multi_year_financials || {};
-
-  document.getElementById('resultTitle').textContent =
-    `${(eng.type||'Strategy').replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase())} Analysis: ${data.company}`;
-  document.getElementById('resultQuestion').textContent = data.question;
-  document.getElementById('resultEngagement').textContent =
-    (eng.type||'Strategy').replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
-  document.getElementById('resultDate').textContent = new Date(data.generated_at)
-    .toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-
-  const mt = [
-    {l:'Revenue',v:fmtCurrency(fin.revenue),s:fin.revenue_growth?`${(fin.revenue_growth*100).toFixed(1)}% growth`:''},
-    {l:'Market Cap',v:fmtCurrency(fin.market_cap),s:''},
-    {l:'EBITDA Margin',v:fmtPct(fin.ebitda_margins),s:''},
-    {l:'Profit Margin',v:fmtPct(fin.profit_margins),s:''},
-    {l:'P/E Ratio',v:fin.pe_ratio?fin.pe_ratio.toFixed(1):'N/A',s:`Fwd: ${fin.forward_pe?fin.forward_pe.toFixed(1):'N/A'}`},
-    {l:'Free Cash Flow',v:fmtCurrency(fin.free_cashflow),s:''},
-    {l:'Return on Equity',v:fmtPct(fin.return_on_equity),s:''},
-    {l:'Employees',v:fin.employees?Number(fin.employees).toLocaleString():'N/A',s:''},
-  ];
-  document.getElementById('metricsGrid').innerHTML =
-    mt.map(m=>`<div class="metric-card"><div class="metric-label">${m.l}</div><div class="metric-value">${m.v}</div>${m.s?`<div class="metric-sub">${m.s}</div>`:''}</div>`).join('');
-
-  if (Object.keys(fin).length > 0) {
-    renderRevenueChart(fin);
-    renderStockChart(priceHist, fin);
-    document.getElementById('chartRow').style.display = 'grid';
-  } else {
-    document.getElementById('chartRow').style.display = 'none';
-  }
-
-  // Multi-year chart
-  if (multiYear.years && multiYear.years.length > 1) {
-    renderMultiYearChart(multiYear);
-    document.getElementById('chartMultiYearRow').style.display = 'block';
-  } else {
-    document.getElementById('chartMultiYearRow').style.display = 'none';
-  }
-
-  // Industry benchmark
-  const indBench = data.industry_benchmark || {};
-  if (indBench.overall_score !== undefined) {
-    document.getElementById('sectionBenchmark').style.display = 'block';
-    const rating = (indBench.overall_rating||'Average').toLowerCase();
-    document.getElementById('benchmarkScore').innerHTML = `
-      <div class="score-ring ${rating}">${indBench.overall_score}</div>
-      <div>
-        <div style="font-size:18px;font-weight:700;color:#0a0e27;">${indBench.overall_rating || 'N/A'}</div>
-        <div style="font-size:13px;color:#5a6090;margin-top:4px;">${indBench.primary_name || data.company} vs industry peers</div>
-        <div style="font-size:13px;color:#5a6090;margin-top:6px;line-height:1.6;">${indBench.insight || ''}</div>
-      </div>`;
-  } else {
-    document.getElementById('sectionBenchmark').style.display = 'none';
-  }
-
-  // Competitor comparison table
-  const compBench = data.competitor_benchmark || {};
-  const compTable = compBench.comparison_table || [];
-  if (compTable.length > 0) {
-    document.getElementById('sectionCompetitors').style.display = 'block';
-    const metrics = ['market_cap','revenue','revenue_growth','gross_margins','operating_margins','profit_margins','ebitda_margins','pe_ratio','return_on_equity'];
-    const labels = ['Market Cap','Revenue','Growth','Gross Margin','Op. Margin','Net Margin','EBITDA Margin','P/E','ROE'];
-    const primaryTicker = (data.ticker || '').toUpperCase();
-    let html = `<div style="overflow-x:auto;"><table class="competitor-table"><thead><tr><th>Company</th>${labels.map(l=>`<th>${l}</th>`).join('')}</tr></thead><tbody>`;
-    for (const row of compTable) {
-      const isPrimary = row.ticker.toUpperCase() === primaryTicker;
-      html += `<tr${isPrimary?' class="primary"':''}><td${isPrimary?' class="primary"':''}>${row.name || row.ticker}${isPrimary?' <span style="color:#c9a84c;font-size:11px;">· primary</span>':''}</td>`;
-      for (const m of metrics) {
-        html += `<td>${fmt(row[m], m)}</td>`;
-      }
-      html += '</tr>';
-    }
-    html += `</tbody></table></div>`;
-    if (compBench.strengths && compBench.strengths.length) {
-      html += `<div style="margin-top:16px;padding:16px;background:#f0fdf4;border-radius:12px;border-left:3px solid #22c55e;"><strong style="color:#16a34a;">Strengths:</strong><ul style="margin:8px 0 0 20px;font-size:13px;color:#3a3e60;">${compBench.strengths.map(s=>`<li>${s}</li>`).join('')}</ul></div>`;
-    }
-    if (compBench.weaknesses && compBench.weaknesses.length) {
-      html += `<div style="margin-top:12px;padding:16px;background:#fef0f0;border-radius:12px;border-left:3px solid #ef4444;"><strong style="color:#dc2626;">Areas to Improve:</strong><ul style="margin:8px 0 0 20px;font-size:13px;color:#3a3e60;">${compBench.weaknesses.map(w=>`<li>${w}</li>`).join('')}</ul></div>`;
-    }
-    document.getElementById('competitorTable').innerHTML = html;
-  } else {
-    document.getElementById('sectionCompetitors').style.display = 'none';
-  }
-
-  document.getElementById('execSummary').textContent = analysis.executive_summary || 'Analysis complete.';
-  document.getElementById('frameworksList').innerHTML =
-    fws.map(f=>`<span class="framework-badge">${f.name}</span>`).join('') ||
-    '<span style="color:#5a6090;">Standard frameworks applied.</span>';
-
-  const findings = analysis.findings || [];
-  document.getElementById('findingsList').innerHTML =
-    findings.map((f,i)=>`<div class="finding-item"><span class="finding-num">${i+1}.</span>${f}</div>`).join('') ||
-    '<p style="color:#5a6090;">No specific findings identified.</p>';
-
-  if (analysis.detailed_analysis) {
-    document.getElementById('analysisContent').innerHTML = marked.parse(analysis.detailed_analysis);
-  }
-
-  const recText = recs.recommendations || '';
-  const parsedRecs = parseRecs(recText);
-  document.getElementById('recommendationsList').innerHTML =
-    parsedRecs.length
-      ? parsedRecs.map(r=>`<div class="rec-card"><span class="rec-num">Recommendation ${r.num}</span><div class="rec-text">${r.text}</div></div>`).join('')
-      : `<div class="rec-card"><div class="rec-text">${recText}</div></div>`;
-
-  const riskText = recs.risks || '';
-  const parsedRisks = parseRisks(riskText);
-  document.getElementById('risksList').innerHTML =
-    parsedRisks.length
-      ? parsedRisks.map(r=>`<div class="risk-card ${getSeverity(r.title)}"><div class="risk-title">${r.title}</div>${r.mitigation?`<div class="risk-mitigation"><strong>Mitigation:</strong> ${r.mitigation}</div>`:''}</div>`).join('')
-      : `<div class="risk-card high"><div class="risk-title">${riskText}</div></div>`;
-
-  document.getElementById('sourcesList').innerHTML =
-    sources.length
-      ? sources.slice(0,20).map(s=>`<a href="${s.url}" target="_blank" class="source-link"><strong>${s.title||s.url}</strong>${s.snippet?`<br><span style="color:#8890b0;font-size:12px;">${s.snippet.slice(0,120)}</span>`:''}</a>`).join('')
-      : '<p style="color:#5a6090;padding:12px;">Web research and financial data analysis.</p>';
-
-  resultsSection.classList.add('active');
-  resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+function getSeverity(t) {
+  const l = t.toLowerCase();
+  return (l.includes('critical')||l.includes('existential')||l.includes('severe')||l.includes('high')) ? 'high' : 'medium';
+}
+function fmtCurrency(val) {
+  if (!val && val !== 0) return 'N/A';
+  if (Math.abs(val) >= 1e12) return '$' + (val / 1e12).toFixed(2) + 'T';
+  if (Math.abs(val) >= 1e9) return '$' + (val / 1e9).toFixed(2) + 'B';
+  if (Math.abs(val) >= 1e6) return '$' + (val / 1e6).toFixed(1) + 'M';
+  return '$' + Number(val).toLocaleString();
+}
+function fmtPct(val) {
+  if (val === undefined || val === null || val === 'N/A') return 'N/A';
+  return (val * 100).toFixed(1) + '%';
+}
+function fmt(val, metric) {
+  if (val === undefined || val === null) return 'N/A';
+  const pct = ['revenue_growth','gross_margins','operating_margins','profit_margins','ebitda_margins','return_on_equity','return_on_assets'];
+  if (pct.includes(metric)) return (val * 100).toFixed(1) + '%';
+  if (['market_cap','revenue','enterprise_value','free_cashflow','ebitda','net_income'].includes(metric)) return fmtCurrency(val);
+  return fmtNum(val);
+}
+function fmtNum(val, dec) { if (val === undefined || val === null || val === 'N/A') return 'N/A'; return Number(val).toFixed(dec || 1); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function showError(msg) {
+  document.getElementById('errorBanner').textContent = 'Error: ' + msg;
+  document.getElementById('errorBanner').style.display = 'block';
 }
 
+// ── Loading Overlay ──
+function showLoading() {
+  document.getElementById('loadingOverlay').classList.add('active');
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('lstep' + i).className = 'loading-step';
+    document.getElementById('lstep' + i).querySelector('.step-icon').textContent = '⏳';
+  }
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('active');
+}
+function setLoadingStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('lstep' + i);
+    if (i < n) { el.className = 'loading-step done'; el.querySelector('.step-icon').textContent = '✓'; }
+    else if (i === n) { el.className = 'loading-step active'; el.querySelector('.step-icon').textContent = '⚡'; }
+    else { el.className = 'loading-step'; el.querySelector('.step-icon').textContent = '⏳'; }
+  }
+}
+
+// ── New Charts ──
+function renderBeforeAfterChart(ba) {
+  const comp = ba.comparison || [];
+  if (comp.length < 2) return;
+  const vals = comp.map(c => ({
+    metric: c.metric,
+    before: parseFloat(String(c.before).replace(/[^0-9.\-]/g,'')) || 0,
+    after: parseFloat(String(c.after).replace(/[^0-9.\-]/g,'')) || 0,
+  }));
+  const showBar = document.getElementById('baChartRow');
+  showBar.style.display = 'grid';
+  Plotly.newPlot('chartBeforeAfter', [
+    { x: vals.map(v => v.metric), y: vals.map(v => v.before), name: 'Before', type: 'bar',
+      marker: { color: '#fca5a5', line: { color: '#ef4444', width: 1.5 } },
+      hovertemplate: 'Before: %{y:,.0f}<extra></extra>' },
+    { x: vals.map(v => v.metric), y: vals.map(v => v.after), name: 'After', type: 'bar',
+      marker: { color: '#86efac', line: { color: '#22c55e', width: 1.5 } },
+      hovertemplate: 'After: %{y:,.0f}<extra></extra>' },
+  ], {
+    margin: { t: 10, r: 10, b: 80, l: 60 },
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { family: 'Inter', size: 11, color: '#5a6090' },
+    yaxis: { gridcolor: '#f0f1f6', zeroline: false },
+    xaxis: { gridcolor: '#f0f1f6', tickangle: -25 },
+    barmode: 'group', hovermode: 'x unified', legend: { orientation: 'h', y: 1.1, x: 0.5, xanchor: 'center' },
+    height: 280,
+  }, { responsive: true, displayModeBar: false });
+}
+
+function renderCostBreakdown(ba) {
+  const comp = ba.comparison || [];
+  const beforeVals = comp.filter(c => {
+    const v = parseFloat(String(c.before).replace(/[^0-9.\-]/g,'')) || 0;
+    return v > 0 && !c.metric.toLowerCase().includes('ratio') && !c.metric.toLowerCase().includes('pe');
+  });
+  if (beforeVals.length < 2) return;
+  const showBar = document.getElementById('baChartRow');
+  showBar.style.display = 'grid';
+  const colors = ['#1a1a3e','#4f46e5','#6366f1','#818cf8','#a5b4fc','#c7d2fe'];
+  Plotly.newPlot('chartResourceBreakdown', [{
+    labels: beforeVals.map(c => c.metric),
+    values: beforeVals.map(c => parseFloat(String(c.before).replace(/[^0-9.\-]/g,'')) || 0),
+    type: 'pie',
+    marker: { colors: colors },
+    textinfo: 'label+percent',
+    textposition: 'outside',
+    hovertemplate: '%{label}: %{value:,.0f}<extra></extra>',
+  }], {
+    margin: { t: 10, r: 10, b: 30, l: 10 },
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { family: 'Inter', size: 11, color: '#5a6090' },
+    showlegend: false, height: 280,
+  }, { responsive: true, displayModeBar: false });
+}
+
+// ── Charts ──
 function renderRevenueChart(fin) {
   const labels = ['Revenue','Gross Profit','Operating Income','EBITDA','Net Income'];
   const values = [
@@ -548,25 +945,22 @@ function renderRevenueChart(fin) {
     (fin.revenue*(fin.operating_margins||0))||0, fin.ebitda||0,
     (fin.revenue*(fin.profit_margins||0))||0
   ];
-  const trace = {
+  Plotly.newPlot('chartRevenue', [{
     x: labels, y: values, type: 'bar',
     marker: { color: ['#1a1a3e','#4f46e5','#6366f1','#818cf8','#a5b4fc'], borderRadius: 6 },
     hovertemplate: '%{y:$,.0f}<extra></extra>'
-  };
-  Plotly.newPlot('chartRevenue', [trace], {
+  }], {
     margin: {t:10,r:10,b:40,l:60}, paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
     font: {family:'Inter',size:12,color:'#5a6090'}, yaxis:{tickprefix:'$',gridcolor:'#f0f1f6',zeroline:false},
     xaxis:{gridcolor:'#f0f1f6'}, hovermode:'x', showlegend:false, height:260
   }, {responsive:true,displayModeBar:false});
 }
-
 function renderStockChart(priceHist, fin) {
   if (!priceHist.current_price) {
-    document.getElementById('chartStock').innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:center;height:260px;color:#8890b0;">Stock price data unavailable</div>';
+    document.getElementById('chartStock').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:260px;color:#8890b0;">Stock price data unavailable</div>';
     return;
   }
-  const gauge = {
+  Plotly.newPlot('chartStock', [{
     value: priceHist.current_price,
     delta: { reference: priceHist.current_price * (1 - (priceHist.total_return||0)/100), increasing:{color:'#22c55e'}, decreasing:{color:'#ef4444'} },
     gauge: {
@@ -579,56 +973,33 @@ function renderStockChart(priceHist, fin) {
       ],
       threshold: { line: { color:'#c9a84c',width:4 }, thickness:0.75, value: fin.target_mean_price||priceHist.current_price }
     },
+    type: 'indicator', mode: 'number+gauge+delta',
     title: { text:`${fin.name||''}<br><span style="font-size:13px;color:#5a6090;">52W: $${(priceHist.low_52w||0).toFixed(2)} - $${(priceHist.high_52w||0).toFixed(2)} | ${(priceHist.total_return||0).toFixed(1)}% YTD</span>`, font:{size:14} }
-  };
-  Plotly.newPlot('chartStock', [{...gauge, type:'indicator', mode:'number+gauge+delta'}], {
+  }], {
     margin:{t:60,r:30,b:20,l:30}, paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
     font:{family:'Inter',size:12,color:'#5a6090'}, height:260
   }, {responsive:true,displayModeBar:false});
 }
-
 function renderMultiYearChart(multiYear) {
   const years = multiYear.years || [];
   if (years.length < 2) return;
-  const labels = years.map(y=>y.year).reverse();
-  const revenue = years.map(y=>y.total_revenue).reverse();
-  const netIncome = years.map(y=>y.net_income).reverse();
-  const fcf = years.map(y=>y.free_cashflow).reverse();
-
+  const labels = years.map(y => y.year).reverse();
+  const revenue = years.map(y => y.total_revenue).reverse();
+  const netIncome = years.map(y => y.net_income).reverse();
+  const fcf = years.map(y => y.free_cashflow).reverse();
   const data = [
-    { x: labels, y: revenue, type: 'bar', name: 'Revenue',
-      marker: { color: '#1a1a3e', borderRadius: 4 },
-      hovertemplate: '%{y:$,.0f}<extra>Revenue</extra>' },
-    { x: labels, y: netIncome, type: 'scatter', mode: 'lines+markers',
-      name: 'Net Income', line: { color: '#22c55e', width: 3 },
-      marker: { size: 8, color: '#22c55e' },
-      yaxis: 'y2', hovertemplate: '%{y:$,.0f}<extra>Net Income</extra>' },
+    { x: labels, y: revenue, type: 'bar', name: 'Revenue', marker: { color: '#1a1a3e', borderRadius: 4 }, hovertemplate: '%{y:$,.0f}<extra>Revenue</extra>' },
+    { x: labels, y: netIncome, type: 'scatter', mode: 'lines+markers', name: 'Net Income', line: { color: '#22c55e', width: 3 }, marker: { size: 8, color: '#22c55e' }, yaxis: 'y2', hovertemplate: '%{y:$,.0f}<extra>Net Income</extra>' },
   ];
-
-  const layout = {
-    margin: { t: 10, r: 60, b: 40, l: 60 },
-    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
-    font: { family: 'Inter', size: 12, color: '#5a6090' },
-    yaxis: { tickprefix: '$', gridcolor: '#f0f1f6', zeroline: false, title: 'Revenue' },
-    yaxis2: { tickprefix: '$', overlaying: 'y', side: 'right', gridcolor: '#f0f1f6', zeroline: false, title: 'Net Income' },
-    xaxis: { gridcolor: '#f0f1f6' },
-    hovermode: 'x unified',
-    legend: { orientation: 'h', y: 1.1, x: 0.5, xanchor: 'center', font: { size: 12 } },
-    height: 300,
-    barmode: 'group',
-  };
-
-  // Add FCF if available
   if (fcf.some(v => v !== null && v !== undefined)) {
-    data.push({
-      x: labels, y: fcf, type: 'scatter', mode: 'lines+markers',
-      name: 'Free Cash Flow', line: { color: '#c9a84c', width: 2, dash: 'dot' },
-      marker: { size: 6, color: '#c9a84c' },
-      yaxis: 'y2', hovertemplate: '%{y:$,.0f}<extra>FCF</extra>',
-    });
+    data.push({ x: labels, y: fcf, type: 'scatter', mode: 'lines+markers', name: 'Free Cash Flow', line: { color: '#c9a84c', width: 2, dash: 'dot' }, marker: { size: 6, color: '#c9a84c' }, yaxis: 'y2', hovertemplate: '%{y:$,.0f}<extra>FCF</extra>' });
   }
-
-  Plotly.newPlot('chartMultiYear', data, layout, { responsive: true, displayModeBar: false });
+  Plotly.newPlot('chartMultiYear', data, {
+    margin: { t:10, r:60, b:40, l:60 }, paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+    font: { family:'Inter', size:12, color:'#5a6090' }, yaxis: { tickprefix:'$', gridcolor:'#f0f1f6', zeroline:false, title:'Revenue' },
+    yaxis2: { tickprefix:'$', overlaying:'y', side:'right', gridcolor:'#f0f1f6', zeroline:false, title:'Net Income' },
+    xaxis: { gridcolor:'#f0f1f6' }, hovermode:'x unified', legend: { orientation:'h', y:1.1, x:0.5, xanchor:'center', font:{size:12} }, height:300, barmode:'group'
+  }, { responsive:true, displayModeBar:false });
 }
 </script>
 </body>

@@ -32,12 +32,15 @@ class LLMClient:
                     raise
 
     def chat_light(self, system: str, messages: List[dict]) -> str:
-        return self._call(self._chat, config.GEMINI_MODEL_LIGHT, system, messages, config.MAX_TOKENS_LIGHT)
+        return self._call(self._chat, config.GEMINI_MODEL_LIGHT, system, messages, config.MAX_TOKENS_LIGHT, 0.3)
 
     def chat_heavy(self, system: str, messages: List[dict]) -> str:
-        return self._call(self._chat, config.GEMINI_MODEL_HEAVY, system, messages, config.MAX_TOKENS_HEAVY)
+        return self._call(self._chat, config.GEMINI_MODEL_HEAVY, system, messages, config.MAX_TOKENS_HEAVY, 0.3)
 
-    def _chat(self, model: str, system: str, messages: List[dict], max_tokens: int) -> str:
+    def chat_conversational(self, system: str, messages: List[dict]) -> str:
+        return self._call(self._chat, config.GEMINI_MODEL_LIGHT, system, messages, 4096, 0.7)
+
+    def _chat(self, model: str, system: str, messages: List[dict], max_tokens: int, temperature: float = 0.3) -> str:
         contents = self._build_contents(messages)
         response = self.client.models.generate_content(
             model=model,
@@ -45,19 +48,22 @@ class LLMClient:
             config={
                 "system_instruction": system,
                 "max_output_tokens": max_tokens,
-                "temperature": 0.3,
+                "temperature": temperature,
             },
         )
         return response.text
 
     def structured_light(self, system: str, messages: List[dict], schema: dict) -> dict:
-        return self._call(self._structured, config.GEMINI_MODEL_LIGHT, system, messages, schema, config.MAX_TOKENS_LIGHT)
+        return self._call(self._structured, config.GEMINI_MODEL_LIGHT, system, messages, schema, config.MAX_TOKENS_LIGHT, 0.2)
 
     def structured_heavy(self, system: str, messages: List[dict], schema: dict) -> dict:
-        return self._call(self._structured, config.GEMINI_MODEL_HEAVY, system, messages, schema, config.MAX_TOKENS_HEAVY)
+        return self._call(self._structured, config.GEMINI_MODEL_HEAVY, system, messages, schema, config.MAX_TOKENS_HEAVY, 0.2)
+
+    def structured_conversational(self, system: str, messages: List[dict], schema: dict) -> dict:
+        return self._call(self._structured, config.GEMINI_MODEL_LIGHT, system, messages, schema, 4096, 0.5)
 
     def _structured(
-        self, model: str, system: str, messages: List[dict], schema: dict, max_tokens: int
+        self, model: str, system: str, messages: List[dict], schema: dict, max_tokens: int, temperature: float = 0.2
     ) -> dict:
         schema_prompt = (
             f"Return your response as valid JSON matching this schema:\n{json.dumps(schema, indent=2)}\n"
